@@ -20,6 +20,7 @@ def main():
         user = env['user'][0]
     except KeyError as e:
         return_error('Missing parameter {0}'.format(e))
+        return
     # Remove ""
     board = board[1:-1]
     if check_board(board, width, height) and check_user(user):
