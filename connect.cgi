@@ -127,7 +127,7 @@ def get_value(fd, hsh):
 
 def check_board(brd, width, height):
     match = re.match('[ xo]{%d}' % width * height, brd)
-    if not match or match.string != brd:
+    if not match or match.string != brd or len(brd) != width * height:
         return_error('board format incorrect.')
         return False
     return True
