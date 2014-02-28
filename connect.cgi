@@ -17,6 +17,7 @@ def main():
     try:
         width = int(env['width'][0])
         height = int(env['height'][0])
+        win = int(env['win'][0])
         board = env['board'][0]
         user = env['user'][0]
     except KeyError as e:
@@ -25,13 +26,13 @@ def main():
     # Remove ""
     board = board[1:-1]
     if check_board(board, width, height) and check_user(user):
-        res = response(user, board, width, height)
+        res = response(user, board, width, height, win)
         return_response(res)
 
 
-def response(user, board, width, height):
+def response(user, board, width, height, win):
     succ = successors(board, width, height)
-    filename = db_name(user, width, height)
+    filename = db_name(user, width, height, win)
     values = []
     hashes = []
     with open(filename) as f:
@@ -45,8 +46,9 @@ def response(user, board, width, height):
     return res
 
 
-def db_name(user, width, height):
-    path = '~{0}/public_html/connect{1}x{2}.txt'.format(user, width, height)
+def db_name(user, width, height, win):
+    path = ('~{0}/public_html/' +
+            'connect_{1}_{2}x{3}.txt').format(user, win, width, height)
     return os.path.expanduser(path)
 
 
@@ -138,19 +140,25 @@ def check_user(user):
         return False
     return True
 
+
 def get_rows(brd, width, height):
     return [brd[i::width] for i in range(0, height)]
+
 
 def get_p_diags(brd, width, height):
     return [brd[i::width + 1] for i in range(0, height)]
 
+
 def get_n_diags(brd, width, height):
     return [brd[i::width - 1] for i in range(0, height)]
+
 
 def get_diagonals(brd, width, height):
     return get_p_diags(brd, width, height) + get_n_diags(brd, width, height)
 
+
 db = []
+
 
 def store(brd, width, height, res):
     hsh = hash_brd(brd, width, height)
@@ -159,34 +167,38 @@ def store(brd, width, height, res):
     db[hsh] = res
     return res
 
-def solve(brd, width, height):
+
+def solve(brd, width, height, win):
     cols = get_columns(brd, width, height)
+    winx = 'x' * win
+    wino = 'o' * win
     for c in cols:
-        if 'xxx' in c:
+        if winx in c:
             return store(brd, width, height, 'x')
-        elif 'ooo' in c:
+        elif wino in c:
             return store(brd, width, height, 'o')
     rows = get_rows(brd, width, height)
     for r in rows:
-        if 'xxx' in r:
+        if winx in r:
             return store(brd, width, height, 'x')
-        elif 'ooo' in r:
+        elif wino in r:
             return store(brd, width, height, 'o')
     diags = get_diagonals(brd, width, height)
     for d in diags:
-        if 'xxx' in d:
+        if winx in d:
             return store(brd, width, height, 'x')
-        elif 'ooo' in d:
+        elif wino in d:
             return store(brd, width, height, 'o')
-    
+
     children = []
     for s in successors(brd, width, height):
-        children.append(solve(s, width, height))
+        children.append(solve(s, width, height, win))
 
     if turn(brd) == 'o' and 'o' in children:
         return store(brd, width, height, 'o')
     elif turn(brd) == 'x' and 'x' in children:
         return store(brd, width, height, 'x')
+
 
 def to_line(v):
     if v == 'o':
@@ -196,15 +208,21 @@ def to_line(v):
     else:
         return 'T\n'
 
+
 def save_db(filename):
     with open(filename, 'w') as f:
         for v in db:
             f.write(to_line(v))
 
+
+def solve_game(width, height, win):
+    solve(' ' * width * height, width, height, win)
+    save_db('connect_{0}_{1}x{2}.txt'.format(win, width, height))
+
+
 print()
 try:
-    #solve(' ' * 16, 4, 4)
-    #save_db('connect4x4.txt')
+    #solve_game(3, 3, 3)
     main()
 except Exception as e:
     return_error('Exception: {0}'.format(e))
