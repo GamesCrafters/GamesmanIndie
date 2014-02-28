@@ -125,7 +125,7 @@ def check_board(brd, width, height):
 
 
 def check_user(user):
-    match = re.match('[eecs]{2}[0-9]{2,3}[-][A-z]{2,}|[A-z]*', user)
+    match = re.match('[eecs]{2}[0-9]{1,3}[-][A-z]{2,}|[A-z]*', user)
     if not match or match.string != user:
         return_error('user format incorrect.')
         return False
