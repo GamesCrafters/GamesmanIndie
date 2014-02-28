@@ -138,9 +138,73 @@ def check_user(user):
         return False
     return True
 
+def get_rows(brd, width, height):
+    return [brd[i::width] for i in range(0, height)]
+
+def get_p_diags(brd, width, height):
+    return [brd[i::width + 1] for i in range(0, height)]
+
+def get_n_diags(brd, width, height):
+    return [brd[i::width - 1] for i in range(0, height)]
+
+def get_diagonals(brd, width, height):
+    return get_p_diags(brd, width, height) + get_n_diags(brd, width, height)
+
+db = []
+
+def store(brd, width, height, res):
+    hsh = hash_brd(brd, width, height)
+    if len(db) < hsh:
+        db.extend([None] * (1 + hsh - len(db)))
+    db[hsh] = res
+    return res
+
+def solve(brd, width, height):
+    cols = get_columns(brd, width, height)
+    for c in cols:
+        if 'xxx' in c:
+            return store(brd, width, height, 'x')
+        elif 'ooo' in c:
+            return store(brd, width, height, 'o')
+    rows = get_rows(brd, width, height)
+    for r in rows:
+        if 'xxx' in r:
+            return store(brd, width, height, 'x')
+        elif 'ooo' in r:
+            return store(brd, width, height, 'o')
+    diags = get_diagonals(brd, width, height)
+    for d in diags:
+        if 'xxx' in d:
+            return store(brd, width, height, 'x')
+        elif 'ooo' in d:
+            return store(brd, width, height, 'o')
+    
+    children = []
+    for s in successors(brd, width, height):
+        children.append(solve(s, width, height))
+
+    if turn(brd) == 'o' and 'o' in children:
+        return store(brd, width, height, 'o')
+    elif turn(brd) == 'x' and 'x' in children:
+        return store(brd, width, height, 'x')
+
+def to_line(v):
+    if v == 'o':
+        return 'W\n'
+    elif v == 'x':
+        return 'L\n'
+    else:
+        return 'T\n'
+
+def save_db(filename):
+    with open(filename, 'w') as f:
+        for v in db:
+            f.write(to_line(v))
 
 print()
 try:
+    #solve(' ' * 16, 4, 4)
+    #save_db('connect4x4.txt')
     main()
 except Exception as e:
     return_error('Exception: {0}'.format(e))
