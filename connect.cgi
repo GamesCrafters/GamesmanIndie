@@ -9,6 +9,7 @@ import cgi
 import json
 import re
 import os.path
+import math
 
 
 def main():
@@ -32,12 +33,15 @@ def response(user, board, width, height):
     succ = successors(board, width, height)
     filename = db_name(user, width, height)
     values = []
+    hashes = []
     with open(filename) as f:
         for s in succ:
-            values.append(get_value(f, hash_brd(s, width, height)))
+            hsh = hash_brd(s, width, height)
+            hashes.append(hsh)
+            values.append(get_value(f, hsh))
     res = []
-    for s, v in zip(succ, values):
-        res.append({'board': s, 'value': v})
+    for s, v, h in zip(succ, values, hashes):
+        res.append({'board': s, 'value': v, 'hash': h})
     return res
 
 
@@ -70,19 +74,21 @@ def turn(brd):
 
 def hash_brd(brd, width, height):
     columns = get_columns(brd, width, height)
+    len_bits = int(math.ceil(math.log(height, 2)))
     out = 0
-    for i in range(width):
-        out |= to_bits(columns[i]) << i * (height + 1)
+    for i, col in enumerate(columns):
+        length = len(col.strip())
+        out |= length
+        out |= (to_bits(col) << len_bits)
+        out = out << (length + len_bits)
     return out
 
 
 def to_bits(column):
-    if 'x' not in column and 'o' not in column:
-        return 0
-    out = 1
+    out = 0
     for i, c in enumerate(column):
         if c == 'x':
-            out |= 0x1 << (i + 1)
+            out |= 0x1 << len(column) - i - 1
     return out
 
 
