@@ -4,12 +4,13 @@
 
 from __future__ import print_function
 
-import sys
 import cgi
 import json
-import re
-import os.path
 import math
+import os.path
+import re
+import sys
+import traceback
 
 
 def main():
@@ -76,21 +77,21 @@ def turn(brd):
 
 def hash_brd(brd, width, height):
     columns = get_columns(brd, width, height)
-    len_bits = int(math.ceil(math.log(height, 2)))
+    bits_per_column = height + 1
     out = 0
     for i, col in enumerate(columns):
-        length = len(col.strip())
-        out |= length
-        out |= (to_bits(col) << len_bits)
-        out = out << (length + len_bits)
+        out |= to_bits(col) << (i * bits_per_column)
     return out
 
 
 def to_bits(column):
+    column = column.strip()
     out = 0
+    out |= 0x1 << len(column)
     for i, c in enumerate(column):
         if c == 'x':
             out |= 0x1 << len(column) - i - 1
+    print('"{0:>4}" => {1:>5}'.format(column, bin(out)[2:]))
     return out
 
 
@@ -157,47 +158,66 @@ def get_diagonals(brd, width, height):
     return get_p_diags(brd, width, height) + get_n_diags(brd, width, height)
 
 
-db = []
+db = {}
 
 
-def store(brd, width, height, res):
+def db_set(brd, width, height, res):
     hsh = hash_brd(brd, width, height)
-    if len(db) < hsh:
-        db.extend([None] * (1 + hsh - len(db)))
     db[hsh] = res
     return res
 
 
+def db_get(brd, width, height):
+    hsh = hash_brd(brd, width, height)
+    try:
+        return db[hsh]
+    except KeyError:
+        return None
+
+
 def solve(brd, width, height, win):
+    res = db_get(brd, width, height)
+    if res is not None:
+        return res
     cols = get_columns(brd, width, height)
     winx = 'x' * win
     wino = 'o' * win
     for c in cols:
         if winx in c:
-            return store(brd, width, height, 'x')
+            return db_set(brd, width, height, 'x')
         elif wino in c:
-            return store(brd, width, height, 'o')
+            return db_set(brd, width, height, 'o')
     rows = get_rows(brd, width, height)
     for r in rows:
         if winx in r:
-            return store(brd, width, height, 'x')
+            return db_set(brd, width, height, 'x')
         elif wino in r:
-            return store(brd, width, height, 'o')
+            return db_set(brd, width, height, 'o')
     diags = get_diagonals(brd, width, height)
     for d in diags:
         if winx in d:
-            return store(brd, width, height, 'x')
+            return db_set(brd, width, height, 'x')
         elif wino in d:
-            return store(brd, width, height, 'o')
+            return db_set(brd, width, height, 'o')
 
     children = []
     for s in successors(brd, width, height):
         children.append(solve(s, width, height, win))
 
-    if turn(brd) == 'o' and 'o' in children:
-        return store(brd, width, height, 'o')
-    elif turn(brd) == 'x' and 'x' in children:
-        return store(brd, width, height, 'x')
+    if turn(brd) == 'o':
+        if 'o' in children:
+            return db_set(brd, width, height, 'o')
+        elif None in children:
+            return None
+        else:
+            return db_set(brd, width, height, 'x')
+    if turn(brd) == 'x':
+        if 'x' in children:
+            return db_set(brd, width, height, 'x')
+        elif None in children:
+            return None
+        else:
+            return db_set(brd, width, height, 'o')
 
 
 def to_line(v):
@@ -209,10 +229,51 @@ def to_line(v):
         return 'T\n'
 
 
+# --- => 0
+# --o => 1
+# --x => 2
+# -oo => 3
+# -ox => 4
+# -xo => 5
+# -xx => 6
+# ooo => 7
+# oox => 8
+# oxo => 9
+# oxx => 10
+# xoo => 11
+# xox => 12
+# xxo => 13
+# xxx => 14
+
+
+# --- => 01 => 0001
+# --o => 02 => 0010
+# --x => 03 => 0011
+# -oo => 04 => 0100
+# -ox => 05 => 0101
+# -xo => 06 => 0110
+# -xx => 07 => 0111
+# ooo => 08 => 1000
+# oox => 09 => 1001
+# oxo => 10 => 1010
+# oxx => 11 => 1011
+# xoo => 12 => 1100
+# xox => 13 => 1101
+# xxo => 14 => 1110
+# xxx => 15 => 1111
+
+
 def save_db(filename):
     with open(filename, 'w') as f:
-        for v in db:
+        i = 0
+        #while i not in db:
+        for k, v in sorted(db.iteritems()):
+            while i != k:
+                f.write(to_line(None))
+                i += 1
             f.write(to_line(v))
+        #for v in db:
+            #f.write(to_line(v))
 
 
 def solve_game(width, height, win):
@@ -220,9 +281,38 @@ def solve_game(width, height, win):
     save_db('connect_{0}_{1}x{2}.txt'.format(win, width, height))
 
 
+solve_game(4, 4, 3)
+to_bits('    ')
+to_bits('   o')
+to_bits('   x')
+to_bits('  oo')
+to_bits('  ox')
+to_bits('  xx')
+to_bits(' ooo')
+to_bits(' oox')
+to_bits(' oxo')
+to_bits(' oxx')
+to_bits(' xoo')
+to_bits(' xox')
+to_bits(' xxo')
+to_bits(' xxx')
+to_bits('oooo')
+to_bits('ooox')
+to_bits('ooxo')
+to_bits('ooxx')
+to_bits('oxoo')
+to_bits('oxox')
+to_bits('oxxx')
+to_bits('xooo')
+to_bits('xoox')
+to_bits('xoxo')
+to_bits('xoxx')
+to_bits('xxoo')
+to_bits('xxox')
+to_bits('xxxo')
+to_bits('xxxx')
 print()
-try:
-    #solve_game(3, 3, 3)
-    main()
-except Exception as e:
-    return_error('Exception: {0}'.format(e))
+#try:
+    #main()
+#except Exception as e:
+    #return_error('Exception: {0}, {1}'.format(e, traceback.format_exc()))
