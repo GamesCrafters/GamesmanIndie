@@ -91,7 +91,7 @@ def to_bits(column):
     for i, c in enumerate(column):
         if c == 'x':
             out |= 0x1 << len(column) - i - 1
-    print('"{0:>4}" => {1:>5}'.format(column, bin(out)[2:]))
+    #print('"{0:>4}" => {1:>5}'.format(column, bin(out)[2:]))
     return out
 
 
@@ -278,41 +278,44 @@ def save_db(filename):
 
 def solve_game(width, height, win):
     solve(' ' * width * height, width, height, win)
-    save_db('connect_{0}_{1}x{2}.txt'.format(win, width, height))
+    save_db('{1}x{2}_connect{0}.txt'.format(win, width, height))
 
 
-solve_game(4, 4, 3)
-to_bits('    ')
-to_bits('   o')
-to_bits('   x')
-to_bits('  oo')
-to_bits('  ox')
-to_bits('  xx')
-to_bits(' ooo')
-to_bits(' oox')
-to_bits(' oxo')
-to_bits(' oxx')
-to_bits(' xoo')
-to_bits(' xox')
-to_bits(' xxo')
-to_bits(' xxx')
-to_bits('oooo')
-to_bits('ooox')
-to_bits('ooxo')
-to_bits('ooxx')
-to_bits('oxoo')
-to_bits('oxox')
-to_bits('oxxx')
-to_bits('xooo')
-to_bits('xoox')
-to_bits('xoxo')
-to_bits('xoxx')
-to_bits('xxoo')
-to_bits('xxox')
-to_bits('xxxo')
-to_bits('xxxx')
+#solve_game(6, 6, 4)
+#solve_game(3, 3, 3)
+
+#to_bits('    ')
+#to_bits('   o')
+#to_bits('   x')
+#to_bits('  oo')
+#to_bits('  ox')
+#to_bits('  xx')
+#to_bits(' ooo')
+#to_bits(' oox')
+#to_bits(' oxo')
+#to_bits(' oxx')
+#to_bits(' xoo')
+#to_bits(' xox')
+#to_bits(' xxo')
+#to_bits(' xxx')
+#to_bits('oooo')
+#to_bits('ooox')
+#to_bits('ooxo')
+#to_bits('ooxx')
+#to_bits('oxoo')
+#to_bits('oxox')
+#to_bits('oxxx')
+#to_bits('xooo')
+#to_bits('xoox')
+#to_bits('xoxo')
+#to_bits('xoxx')
+#to_bits('xxoo')
+#to_bits('xxox')
+#to_bits('xxxo')
+#to_bits('xxxx')
+
 print()
-#try:
-    #main()
-#except Exception as e:
-    #return_error('Exception: {0}, {1}'.format(e, traceback.format_exc()))
+try:
+    main()
+except Exception as e:
+    return_error('Exception: {0}, {1}'.format(e, traceback.format_exc()))
