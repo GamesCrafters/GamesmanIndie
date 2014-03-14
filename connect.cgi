@@ -43,8 +43,9 @@ def response(user, board, width, height, win):
             hashes.append(hsh)
             values.append(get_value(f, hsh, s, width, height))
     res = []
-    for s, v, h in zip(succ, values, hashes):
-        res.append({'board': s, 'value': v, 'hash': h})
+    if not winner(board, width, height, win):
+        for s, v, h in zip(succ, values, hashes):
+            res.append({'board': s, 'value': v, 'hash': h})
     return res
 
 
@@ -204,30 +205,27 @@ def db_get(brd, width, height):
         return None
 
 
+def winner(brd, width, height, win):
+    winx = 'x' * win
+    wino = 'o' * win
+    cols = get_columns(brd, width, height)
+    rows = get_rows(brd, width, height)
+    diags = get_diagonals(brd, width, height)
+    for c in cols + rows + diags:
+        if winx in c:
+            return 'x'
+        elif wino in c:
+            return 'o'
+
+
 def solve(brd, width, height, win):
     res = db_get(brd, width, height)
     if res is not None:
         return res
-    cols = get_columns(brd, width, height)
-    winx = 'x' * win
-    wino = 'o' * win
-    for c in cols:
-        if winx in c:
-            return db_set(brd, width, height, 'x')
-        elif wino in c:
-            return db_set(brd, width, height, 'o')
-    rows = get_rows(brd, width, height)
-    for r in rows:
-        if winx in r:
-            return db_set(brd, width, height, 'x')
-        elif wino in r:
-            return db_set(brd, width, height, 'o')
-    diags = get_diagonals(brd, width, height)
-    for d in diags:
-        if winx in d:
-            return db_set(brd, width, height, 'x')
-        elif wino in d:
-            return db_set(brd, width, height, 'o')
+    who = winner(brd, width, height, win)
+    if who is not None:
+        db_set(brd, width, height, who)
+        return who
 
     children = []
     for s in successors(brd, width, height):
@@ -310,7 +308,7 @@ def solve_game(width, height, win):
     save_db('{1}x{2}_connect{0}.txt'.format(win, width, height))
 
 
-#solve_game(4, 5, 4)
+solve_game(3, 5, 3)
 #solve_game(3, 3, 3)
 
 #to_bits('    ')
