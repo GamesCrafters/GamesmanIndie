@@ -7,6 +7,7 @@ from __future__ import print_function
 import cgi
 import json
 import math
+import os
 import os.path
 import re
 import sys
@@ -40,7 +41,7 @@ def response(user, board, width, height, win):
         for s in succ:
             hsh = hash_brd(s, width, height)
             hashes.append(hsh)
-            values.append(get_value(f, hsh))
+            values.append(get_value(f, hsh, s, width, height))
     res = []
     for s, v, h in zip(succ, values, hashes):
         res.append({'board': s, 'value': v, 'hash': h})
@@ -49,7 +50,7 @@ def response(user, board, width, height, win):
 
 def db_name(user, width, height, win):
     path = ('~{0}/public_html/' +
-            'connect_{1}_{2}x{3}.txt').format(user, win, width, height)
+            '{2}x{3}_connect{1}.txt').format(user, win, width, height)
     return os.path.expanduser(path)
 
 
@@ -64,7 +65,7 @@ def successors(brd, width, height):
             continue
         new_col = move_column(to_move, col)
         new_brd = ''.join(columns[:i] + [new_col] + columns[i+1:])
-        #assert len(new_brd) == len(brd), '{}\n{!r} != \n{!r}'.format(i, new_brd, brd)
+        #assert len(new_brd) == len(brd)
         out.append(new_brd)
     return out
 
@@ -122,10 +123,36 @@ def index_of_last(string, char):
     #assert string[out + 1:].find(char) == -1
     return out
 
+NAIVE_STORE = True
 
-def get_value(fd, hsh):
-    fd.seek(2 * hsh)
-    return fd.read(1)
+
+def get_value(fd, hsh, brd, width, height):
+    if NAIVE_STORE:
+        # Reverse board
+        brd = brd[::-1]
+        # Swap players and capitalize
+        brd = brd.replace('o', 'X')
+        brd = brd.replace('x', 'O')
+        fd.seek(0, os.SEEK_SET)
+        lines = fd.xreadlines()
+        for line in lines:
+            if brd in line:
+                num = int(line.split()[-1])
+                return get_value_from_naive_num(brd, num)
+        return 'U'
+    else:
+        fd.seek(2 * hsh)
+        return fd.read(1)
+
+
+def get_value_from_naive_num(brd, num):
+    vals = {
+        0: 'U',
+        1: 'W' if turn(brd) == 'o' else 'L',
+        2: 'W' if turn(brd) == 'x' else 'L',
+        3: 'T'
+        }
+    return vals[num & 0b11]
 
 
 def check_board(brd, width, height):
