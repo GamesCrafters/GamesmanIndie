@@ -55,6 +55,8 @@ def db_name(user, width, height, win):
 
 def successors(brd, width, height):
     columns = get_columns(brd, width, height)
+    #assert len(brd) == width * height
+    #assert len(''.join(columns)) == len(brd)
     to_move = turn(brd)
     out = []
     for i, col in enumerate(columns):
@@ -62,7 +64,7 @@ def successors(brd, width, height):
             continue
         new_col = move_column(to_move, col)
         new_brd = ''.join(columns[:i] + [new_col] + columns[i+1:])
-        assert len(new_brd) == len(brd)
+        #assert len(new_brd) == len(brd), '{}\n{!r} != \n{!r}'.format(i, new_brd, brd)
         out.append(new_brd)
     return out
 
@@ -104,20 +106,20 @@ def return_response(msg):
 
 
 def get_columns(brd, width, height):
-    return [brd[i:i+height] for i in range(0, width * height, width)]
+    return [brd[i:i+height] for i in range(0, width * height, height)]
 
 
 def move_column(turn, column):
     last_space = index_of_last(column, ' ')
     out = column[:last_space] + turn + column[last_space+1:]
-    assert len(out) == len(column)
+    #assert len(out) == len(column)
     return out
 
 
 def index_of_last(string, char):
     out = len(string) - string[::-1].find(char) - 1
-    assert string[out] == char
-    assert string[out + 1:].find(char) == -1
+    #assert string[out] == char
+    #assert string[out + 1:].find(char) == -1
     return out
 
 
@@ -281,7 +283,7 @@ def solve_game(width, height, win):
     save_db('{1}x{2}_connect{0}.txt'.format(win, width, height))
 
 
-#solve_game(6, 6, 4)
+#solve_game(4, 5, 4)
 #solve_game(3, 3, 3)
 
 #to_bits('    ')
