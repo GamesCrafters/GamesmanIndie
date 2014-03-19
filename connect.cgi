@@ -23,12 +23,14 @@ def main():
         board = env['board'][0]
         user = env['user'][0]
     except KeyError as e:
+        print()
         return_error('Missing parameter {0}'.format(e))
         return
     # Remove ""
     board = board[1:-1]
     if check_board(board, width, height) and check_user(user):
         res = response(user, board, width, height, win)
+        print()
         return_response(res)
 
 
@@ -147,10 +149,14 @@ def get_value(fd, hsh, brd, width, height):
 
 
 def get_value_from_naive_num(brd, num):
+    brd = brd.lower()
+    x_turn = brd.count('o') >= brd.count('x')
+    #print('Board: ', brd)
+    #print('X-Turn: ', x_turn)
     vals = {
         0: 'U',
-        1: 'W' if turn(brd) == 'o' else 'L',
-        2: 'W' if turn(brd) == 'x' else 'L',
+        1: 'W' if x_turn else 'L',
+        2: 'W' if not x_turn else 'L',
         3: 'T'
         }
     return vals[num & 0b11]
@@ -341,7 +347,6 @@ solve_game(3, 5, 3)
 #to_bits('xxxo')
 #to_bits('xxxx')
 
-print()
 try:
     main()
 except Exception as e:
