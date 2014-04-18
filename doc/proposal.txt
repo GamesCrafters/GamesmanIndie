@@ -1,0 +1,8 @@
+Connect 4 AI
+Members: Ryan, Trevor
+Creating a bot for Connect 4 for humans to play against at a variety of 
+difficulty levels.
+
+March 10: playable bot (slow/stupid ok)
+April 7: single difficulty bot (reasonably smart/fast)
+May 15: deploy easy, medium, hard, (master?) modes on frontend
