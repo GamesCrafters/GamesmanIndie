@@ -63,6 +63,49 @@ Board.prototype.validMoves = function() {
 
 /***********************************UNIT TESTS*********************************/
 
-function BoardTests() {
-    var board = new Board();
+/** rvwin 
+ *          _ _ _ _ _ _
+ *         |_|_|_|_|_|_|
+ *         |_|_|_|_|_|_|
+ *         |_|_|_|R|_|_|
+ *         |_|_|_|R|_|_|
+ *         |_|_|B|R|B|_|
+ *         |_|R|B|R|B|_|
+ */
+/** rhwin 
+ *          _ _ _ _ _ _
+ *         |_|_|_|_|_|_|
+ *         |_|_|_|_|_|_|
+ *         |_|_|_|_|_|_|
+ *         |B|_|_|_|_|_|
+ *         |B|_|R|R|R|R|
+ *         |B|R|B|R|B|B|
+ */
+/** rdwin 
+ *          _ _ _ _ _ _
+ *         |_|_|_|_|_|_|
+ *         |_|_|_|_|_|_|
+ *         |_|_|_|_|R|_|
+ *         |_|_|_|R|B|_|
+ *         |_|_|R|B|B|_|
+ *         |_|R|B|B|R|R|
+ */
+function runBoardTests() {
+    var passed = 0;
+    var answers = loadAndRunTests();
+    for(var i = 0; i < answers.length; i++) {
+	if(answers[i].result != answers[i].expected) {
+	    console.log(answers[i].name + " failed.");
+	    console.log("Expected: " + answers[i].expected);
+	    console.log("Got: " + answers[i].result);
+	    console.log("Board: " + answers[i].board);
+	} else {
+	    console.log(answers[i].name + " passed.");
+	    passed++;
+	}
+    }
+    console.log(passed + "/" + tests.length + " passed.");
+}
+
+function loadAndRunTests() {
 }
