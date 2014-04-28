@@ -31,6 +31,51 @@ function Board(x, y) {
     };
     this._addConnections = function(pos, color) {
 	var connections = this._connections[color];
+	var x = pos[0], y = pos[1], i;
+	var next = {
+	    n:  function(i) { return [x, y+i]; },
+	    s:  function(i) { return [x, y-i]; },
+	    e:  function(i) { return [x+i, y]; },
+	    w:  function(i) { return [x-i, y]; },
+	    ne: function(i) { return [x+i, y+i]; },
+	    se: function(i) { return [x+i, y-i]; },
+	    sw: function(i) { return [x-i, y-i]; },
+	    nw: function(i) { return [x-i, y+i]; }
+	}
+	var orientations = {
+	    n:  "v",
+	    s:  "v",
+	    e:  "h",
+	    w:  "h",
+	    ne: "d",
+	    se: "d",
+	    sw: "d",
+	    nw: "d"
+	}
+	var cur_pos;
+	var positions_to_set;
+	var o = "";
+	var value;
+	for(var d in ["n", "s", "e", "w", "ne", "se", "sw", "nw"]) {
+	    for(i = 1; i <= 3; i++) {
+		cur_pos = directions[d](i);
+		if(o != orientations[d]) { 
+		    positions_to_set = []; 
+		    value = 1;
+		}
+		o = orientations[d];
+		if(isValidPos(cur_pos) && connections[o][cur_pos] != 0) {
+		    value++;
+		    positions_to_set.push(cur_pos);
+		} else {
+		    break;
+		}
+	    }
+	    if(value >= 4) { this._win[color] = true; }
+	    for(var p in positions_to_set) {
+		connections[p] = value;
+	    }
+	}
     };
     this._removeConnections = function(pos, color) {};
 }
@@ -46,7 +91,7 @@ Board.prototype.makeMove = function(column, color) {
 	_valid_moves.splice(column, 1);
     }
     this._move_history.push({color: color, column: column});
-    this._win[color] = this._addConnections(pos, color);
+    this._addConnections(pos, color);
 };
 Board.prototype.undoLastMove = function() {
     var last_move = _move_history.pop();
@@ -57,12 +102,11 @@ Board.prototype.undoLastMove = function() {
 	this._valid_moves.sort();
     }
     board.pop();
-    this._win[this.currentColor()] = 
-        this._removeConnections(pos, last_move.color);
+    this._removeConnections(pos, last_move.color);
 };
 
 Board.prototype.isWin(color) = function() {
-    return this._win[this.currentColor()];
+    return this._win[color];
 };
 Board.prototype.isLoss(color) = function() {
     return this.isWin(this._getOtherColor(color));
