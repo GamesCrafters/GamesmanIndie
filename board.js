@@ -9,8 +9,8 @@ function Board(x, y) {
 	this._valid_moves.push(i);
     }
     this._connections = {
-	color1: { h: {}, v: {}, d: {} },
-	color2: { h: {}, v: {}, d: {} }
+	color1: { h: {}, v: {}, d1: {}, d2: {} },
+	color2: { h: {}, v: {}, d1: {}, d2: {} }
     };
     this._win = { color1: false, color2: false };
     var pos;
@@ -29,42 +29,43 @@ function Board(x, y) {
     this._getOtherColor = function(color) {
 	return color == color1 ? color2 : color1;
     };
+
+    var next_fns = {
+	n:  function(i) { return [x, y+i]; },
+	s:  function(i) { return [x, y-i]; },
+	e:  function(i) { return [x+i, y]; },
+	w:  function(i) { return [x-i, y]; },
+	ne: function(i) { return [x+i, y+i]; },
+	se: function(i) { return [x+i, y-i]; },
+	sw: function(i) { return [x-i, y-i]; },
+	nw: function(i) { return [x-i, y+i]; }
+    }
+    var orientations = {
+	n:  "v",
+	s:  "v",
+	e:  "h",
+	w:  "h",
+	ne: "d1",
+	sw: "d1",
+	nw: "d2",
+	se: "d2"
+    }
     this._addConnections = function(pos, color) {
 	var connections = this._connections[color];
 	var x = pos[0], y = pos[1], i;
-	var next = {
-	    n:  function(i) { return [x, y+i]; },
-	    s:  function(i) { return [x, y-i]; },
-	    e:  function(i) { return [x+i, y]; },
-	    w:  function(i) { return [x-i, y]; },
-	    ne: function(i) { return [x+i, y+i]; },
-	    se: function(i) { return [x+i, y-i]; },
-	    sw: function(i) { return [x-i, y-i]; },
-	    nw: function(i) { return [x-i, y+i]; }
-	}
-	var orientations = {
-	    n:  "v",
-	    s:  "v",
-	    e:  "h",
-	    w:  "h",
-	    ne: "d",
-	    se: "d",
-	    sw: "d",
-	    nw: "d"
-	}
 	var cur_pos;
 	var positions_to_set;
 	var o = "";
 	var value;
-	for(var d in ["n", "s", "e", "w", "ne", "se", "sw", "nw"]) {
+	for(var d in ["n", "s", "e", "w", "ne", "sw", "nw", "se"]) {
 	    for(i = 1; i <= 3; i++) {
-		cur_pos = directions[d](i);
+		cur_pos = next_fns[d](i);
 		if(o != orientations[d]) { 
 		    positions_to_set = []; 
 		    value = 1;
 		}
 		o = orientations[d];
-		if(isValidPos(cur_pos) && connections[o][cur_pos] != 0) {
+		if(this._isValidPos(cur_pos) && connections[o][cur_pos] != 0) {
 		    value++;
 		    positions_to_set.push(cur_pos);
 		} else {
@@ -73,11 +74,31 @@ function Board(x, y) {
 	    }
 	    if(value >= 4) { this._win[color] = true; }
 	    for(var p in positions_to_set) {
-		connections[p] = value;
+		connections[o][p] = value;
 	    }
 	}
     };
-    this._removeConnections = function(pos, color) {};
+    this._removeConnections = function(pos, color) {
+	var connections = this._connections[color];
+	var x = pos[0], y = pos[1], i;
+	var value = connections.h[pos];
+	connections.h[pos] = 0;
+	connections.v[pos] = 0;
+	connections.d1[pos] = 0;
+	connections.d2[pos] = 0;
+	var o, i, cur_pos;
+	for(var d in ["n", "s", "e", "w", "ne", "sw", "nw", "se"]) {
+	    o = orientations[d];
+	    i = 1;
+	    while(this._isValidPos(cur_pos) && 
+		  connections[o][cur_pos] == value) {
+		cur_pos = next_fns[d](i);
+		connections[o][cur_pos];
+		i++;
+	    }
+	}
+    };
+    this._isValidPos = function(pos) {};
 }
 
 Board.prototype.currentColor = function() {
