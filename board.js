@@ -126,10 +126,6 @@ function Board(x, y) {
     };
 }
 
-Board.prototype.currentColor = function() {
-    return this._current_color;
-}
-
 Board.prototype.makeMove = function(column, color) {
     var pos = [column, this._board[column].length];
     this._board[column].push(color);
