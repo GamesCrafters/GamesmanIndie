@@ -134,7 +134,7 @@ Board.prototype.makeMove = function(column, color) {
     var pos = [column, this._board[column].length];
     this._board[column].push(color);
     if(this._board[column].length === this._height) {
-	this._valid_moves.splice(column, 1);
+	this._valid_moves.splice(this._valid_moves.indexOf(column), 1);
     }
     this._move_history.push({color: color, column: column});
     this._addConnections(pos, color);
@@ -161,7 +161,7 @@ Board.prototype.isLoss = function(color) {
 };
 Board.prototype.isTie = function(color) {
     return !this.isWin(color) && !this.isLoss(color) &&
-           this._valid_moves.length == 0;
+           this._valid_moves.length === 0;
 };
 Board.prototype.isDraw = Board.prototype.isTie;
 Board.prototype.validMoves = function() {
@@ -234,11 +234,31 @@ function loadTestData() {
 	    "rvwin_init",
 	    "rhwin_init",
 	    "rd1win_init",
+	    "rd2win4_init",
+	    "tie_init",
+	    "rhwin7_init",
+	    "rd1win6_init",
+	    "rd2win5_init",
 	    "rvwin",
 	    "rhwin",
-	    "rd1win"
+	    "rd1win4",
+	    "rd2win4",
+	    "tie",
+	    "rhwin7",
+	    "rd1win6",
+	    "rd2win5"
 	],
 	expected: [
+	    true,
+	    true,
+	    true,
+	    true,
+	    true,
+	    true,
+	    true,
+	    true,
+	    true,
+	    true,
 	    true,
 	    true,
 	    true,
@@ -250,14 +270,34 @@ function loadTestData() {
 	    board_eq,
 	    board_eq,
 	    board_eq,
+	    board_eq,
+	    board_eq,
+	    board_eq,
+	    board_eq,
+	    board_eq,
 	    board_data[0].board.isWin,
 	    board_data[1].board.isWin,
-	    board_data[2].board.isWin
+	    board_data[2].board.isWin,
+	    board_data[3].board.isWin,
+	    board_data[4].board.isTie,
+	    board_data[5].board.isWin,
+	    board_data[6].board.isWin,
+	    board_data[7].board.isWin
 	],
 	args: [
 	    [board_data[0].board.toString(), board_data[0].str],
 	    [board_data[1].board.toString(), board_data[1].str],
 	    [board_data[2].board.toString(), board_data[2].str],
+	    [board_data[3].board.toString(), board_data[3].str],
+	    [board_data[4].board.toString(), board_data[4].str],
+	    [board_data[5].board.toString(), board_data[5].str],
+	    [board_data[6].board.toString(), board_data[6].str],
+	    [board_data[7].board.toString(), board_data[7].str],
+	    ["R"],
+	    ["R"],
+	    ["R"],
+	    ["R"],
+	    ["B"],
 	    ["R"],
 	    ["R"],
 	    ["R"]
@@ -266,9 +306,19 @@ function loadTestData() {
 	    null,
 	    null,
 	    null,
+	    null,
+	    null,
+	    null,
+	    null,
+	    null,
 	    board_data[0].board,
 	    board_data[1].board,
-	    board_data[2].board
+	    board_data[2].board,
+	    board_data[3].board,
+	    board_data[4].board,
+	    board_data[5].board,
+	    board_data[6].board,
+	    board_data[7].board
 	],
 	board_strs: []
     };
@@ -284,6 +334,11 @@ function loadBoards() {
     var rvwin4 = new Board(6, 6);
     var rhwin4 = new Board(6, 6);
     var rd1win4 = new Board(6, 6);
+    var rd2win4 = new Board(6, 6);
+    var tie = new Board(6, 6);
+    var rhwin7 = new Board(7, 7);
+    var rd1win6 = new Board(6, 6);
+    var rd2win5 = new Board(6, 6);
 
     rvwin4.makeMove(1, "R");
     rvwin4.makeMove(2, "B");
@@ -334,9 +389,119 @@ function loadBoards() {
     };
     board_data.push(rd1win4_data);
      
+    rd2win4.makeMove(1, "R");
+    rd2win4.makeMove(2, "B");
+    rd2win4.makeMove(4, "R");
+    rd2win4.makeMove(3, "B");
+    rd2win4.makeMove(5, "R");
+    rd2win4.makeMove(1, "B");
+    rd2win4.makeMove(3, "R");
+    rd2win4.makeMove(2, "B");
+    rd2win4.makeMove(2, "R");
+    rd2win4.makeMove(1, "B");
+    rd2win4.makeMove(1, "R");
+    var rd2win4_data = {
+	board: rd2win4,
+	str: "_ _ _ _ _ _ \n|_|_|_|_|_|_|\n|_|_|_|_|_|_|\n|_|R|_|_|_|_|\n|_|B|R|_|_|_|\n|_|B|B|R|_|_|\n|_|R|B|B|R|R|\n"
+    };
+    board_data.push(rd2win4_data);
+    for(var times = 3; times > 0; times--) {
+	for(var i = 0; i <= 4; i+=2) {
+	    tie.makeMove(i+1, "R");
+	    tie.makeMove(i, "B");
+	}
+    }
+    for(var times = 3; times > 0; times--) {
+	for(var i = 0; i <= 4; i+=2) {
+	    tie.makeMove(i, "R");
+	    tie.makeMove(i+1, "B");
+	}
+    }
+    var tie_data = {
+	board: tie,
+	str: "_ _ _ _ _ _ \n|R|B|R|B|R|B|\n|R|B|R|B|R|B|\n|R|B|R|B|R|B|\n|B|R|B|R|B|R|\n|B|R|B|R|B|R|\n|B|R|B|R|B|R|\n"
+    };
+    board_data.push(tie_data);
+
+    rhwin7.makeMove(0, "R");
+    rhwin7.makeMove(0, "B");
+    rhwin7.makeMove(1, "R");
+    rhwin7.makeMove(1, "B");
+    rhwin7.makeMove(2, "R");
+    rhwin7.makeMove(2, "B");
+    rhwin7.makeMove(4, "R");
+    rhwin7.makeMove(4, "B");
+    rhwin7.makeMove(5, "R");
+    rhwin7.makeMove(5, "B");
+    rhwin7.makeMove(6, "R");
+    rhwin7.makeMove(6, "B");
+    rhwin7.makeMove(3, "R");
+    var rhwin7_data = {
+	board: rhwin7,
+	str: "_ _ _ _ _ _ _ \n|_|_|_|_|_|_|_|\n|_|_|_|_|_|_|_|\n|_|_|_|_|_|_|_|\n|_|_|_|_|_|_|_|\n|_|_|_|_|_|_|_|\n|B|B|B|_|B|B|B|\n|R|R|R|R|R|R|R|\n"
+    };
+    board_data.push(rhwin7_data);
+
+    rd1win6.makeMove(5, "R");
+    rd1win6.makeMove(4, "B");
+    rd1win6.makeMove(3, "R");
+    rd1win6.makeMove(2, "B");
+    rd1win6.makeMove(1, "R");
+    rd1win6.makeMove(2, "B");
+    rd1win6.makeMove(1, "R");
+    rd1win6.makeMove(3, "B");
+    rd1win6.makeMove(0, "R");
+    rd1win6.makeMove(4, "B");
+    rd1win6.makeMove(5, "R");
+    rd1win6.makeMove(5, "B");
+    rd1win6.makeMove(2, "R");
+    rd1win6.makeMove(3, "B");
+    rd1win6.makeMove(4, "R");
+    rd1win6.makeMove(4, "B");
+    rd1win6.makeMove(5, "R");
+    rd1win6.makeMove(0, "B");
+    rd1win6.makeMove(5, "R");
+    rd1win6.makeMove(0, "B");
+    rd1win6.makeMove(5, "R");
+    rd1win6.makeMove(0, "B");
+    rd1win6.makeMove(4, "R");
+    rd1win6.makeMove(2, "B");
+    rd1win6.makeMove(3, "R");
+    var rd1win6_data = {
+	board: rd1win6,
+	str: "_ _ _ _ _ _ \n|_|_|_|_|_|R|\n|_|_|_|_|R|R|\n|B|_|B|R|B|R|\n|B|_|R|B|R|B|\n|B|R|B|B|B|R|\n|R|R|B|R|B|R|\n"
+    };
+    board_data.push(rd1win6_data);
+
+    rd2win5.makeMove(4, "R");
+    rd2win5.makeMove(0, "B");
+    rd2win5.makeMove(0, "R");
+    rd2win5.makeMove(3, "B");
+    rd2win5.makeMove(3, "R");
+    rd2win5.makeMove(0, "B");
+    rd2win5.makeMove(0, "R");
+    rd2win5.makeMove(1, "B");
+    rd2win5.makeMove(0, "R");
+    rd2win5.makeMove(1, "B");
+    rd2win5.makeMove(2, "R");
+    rd2win5.makeMove(2, "B");
+    rd2win5.makeMove(2, "R");
+    rd2win5.makeMove(1, "B");
+    rd2win5.makeMove(1, "R");
+    var rd2win5_data = {
+	board: rd2win5,
+	str: "_ _ _ _ _ _ \n|_|_|_|_|_|_|\n|R|_|_|_|_|_|\n|R|R|_|_|_|_|\n|B|B|R|_|_|_|\n|R|B|B|R|_|_|\n|B|B|R|B|R|_|\n"
+    };
+    board_data.push(rd2win5_data);
+
     board_data.push(rvwin4_data);
     board_data.push(rhwin4_data);
     board_data.push(rd1win4_data);
+    board_data.push(rd2win4_data);
+    board_data.push(tie_data);
+    board_data.push(rhwin7_data);
+    board_data.push(rd1win6_data);
+    board_data.push(rd2win5_data);
 
     return board_data;
 }
@@ -367,4 +532,50 @@ function loadBoards() {
  *         |_|_|_|R|B|_|
  *         |_|_|R|B|B|_|
  *         |_|R|B|B|R|R|
+ */
+/** rd2win4 
+ *          _ _ _ _ _ _
+ *         |_|_|_|_|_|_|
+ *         |_|_|_|_|_|_|
+ *         |_|R|_|_|_|_|
+ *         |_|B|R|_|_|_|
+ *         |_|B|B|R|_|_|
+ *         |_|R|B|B|R|R|
+ */
+/** tie
+ *          _ _ _ _ _ _
+ *         |R|B|R|B|R|B|
+ *         |R|B|R|B|R|B|
+ *         |R|B|R|B|R|B|
+ *         |B|R|B|R|B|R|
+ *         |B|R|B|R|B|R|
+ *         |B|R|B|R|B|R|
+ */
+/** rhwin7
+ *          _ _ _ _ _ _ _
+ *         |_|_|_|_|_|_|_|
+ *         |_|_|_|_|_|_|_|
+ *         |_|_|_|_|_|_|_|
+ *         |_|_|_|_|_|_|_|
+ *         |_|_|_|_|_|_|_|
+ *         |B|B|B|_|B|B|B|
+ *         |R|R|R|R|R|R|R|
+ */
+/** rd1win6
+ *          _ _ _ _ _ _
+ *         |_|_|_|_|_|R|
+ *         |_|_|_|_|R|R|
+ *         |B|_|B|R|B|R|
+ *         |B|_|R|B|R|B|
+ *         |B|R|B|B|B|R|
+ *         |R|R|B|R|B|R|
+ */
+/** rd2win5
+ *          _ _ _ _ _ _
+ *         |_|_|_|_|_|_|
+ *         |R|_|_|_|_|_|
+ *         |R|R|_|_|_|_|
+ *         |B|B|R|_|_|_|
+ *         |R|B|B|R|_|_|
+ *         |B|B|R|B|R|_|
  */
