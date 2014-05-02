@@ -1,0 +1,36 @@
+board.js contains a minimal implementation of connect 4 game state for use 
+by an AI. 
+-------------------------------------------------------------------------------
+TODO:
+-Implement better evaluate function
+-Optimize board representation (or replace)
+-Connect to front-end
+-------------------------------------------------------------------------------
+Implementation Notes:
+The board itself is currently represented by an array of arrays:
+
+n|
+.|R   B 
+.|R   B 
+0|R R B B
+  0 . . n
+
+Figure 1: Visualization of board
+
+Information about connected pieces is organized by color and orientation.
+For example, to see how many red pieces are connected vertically at (0, 0),
+access this._connections.R.v[[0,0]]. In Figure 1, the value would be 3.
+Possible orientations include horizontal (h), vertical (v), diagonal with
+a positive slope (d1), and diagonal with a negative slope (d2).
+
+n|0 0 0 0
+.|3 0 0 0
+.|3 0 0 0
+0|3 1 0 0
+  0 . . n
+
+Figure 2: Visualization of red vertical connections using board from Figure 1
+
+Both of these representations can and should be improved upon, but are behaving
+stably to the best of our knowledge.
+-------------------------------------------------------------------------------

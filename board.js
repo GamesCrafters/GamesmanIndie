@@ -1,3 +1,4 @@
+//constructor for Board
 function Board(x, y) {
     this._board = [];
     this._width = x;
@@ -27,6 +28,9 @@ function Board(x, y) {
 	}
     }
     this._move_history = [];
+
+    //helper functions/objects below
+
     this._getOtherColor = function(color) {
 	return color === "R" ? "B" : "R";
     };
@@ -126,6 +130,11 @@ function Board(x, y) {
     };
 }
 
+/**
+ * makeMove() will drop a piece of color "color" in column "column". This
+ * does not enforce player turn order in any way, and will accept any color
+ * or column number, even if invalid.
+ */
 Board.prototype.makeMove = function(column, color) {
     var pos = [column, this._board[column].length];
     this._board[column].push(color);
@@ -135,6 +144,11 @@ Board.prototype.makeMove = function(column, color) {
     this._move_history.push({color: color, column: column});
     this._addConnections(pos, color);
 };
+
+/**
+ * undoLastMove() undoes the last move and any changes it makes to the state
+ * of _connections.
+ */
 Board.prototype.undoLastMove = function() {
     var last_move = this._move_history.pop();
     var col = this._board[last_move.column];
@@ -147,22 +161,50 @@ Board.prototype.undoLastMove = function() {
     col.pop();
 };
 
+/** IMPROVE ME!!
+ * Given a color, evaluate() returns a positive or negative integer depending
+ * on how "good" the current board is for that player.
+ */
 Board.prototype.evaluate = function(color) {};
 
+/**
+ * isWin() will return true if there is a connection of length 4 or higher for
+ * the given color and false otherwise.
+ */
 Board.prototype.isWin = function(color) {
     return this._win[color];
 };
+
+/**
+ * isLoss() will return true if there is a connection of length 4 or higher for
+ * the other player and false otherwise.
+ */
 Board.prototype.isLoss = function(color) {
     return this.isWin(this._getOtherColor(color));
 };
+
+
+/** IMPROVE ME?
+ * isTie() will return true if there are no wins present for either player and
+ * there are no valid moves left.
+ */
 Board.prototype.isTie = function(color) {
     return !this.isWin(color) && !this.isLoss(color) &&
            this._valid_moves.length === 0;
 };
 Board.prototype.isDraw = Board.prototype.isTie;
+
+/**
+ * validMoves() returns an array of column numbers that have room for more
+ * pieces.
+ */
 Board.prototype.validMoves = function() {
     return this._valid_moves;
 };
+
+/**
+ * toString() returns a string representation of this Board for debugging purposes.
+ */
 Board.prototype.toString = function() {
     var str = "_";
     var board = this._board;
@@ -502,7 +544,7 @@ function loadBoards() {
     return board_data;
 }
 
-/** rvwin4
+/** rvwin4: red vertical win with 4 in a row
  *          _ _ _ _ _ _ 
  *         |_|_|_|_|_|_|
  *         |_|_|_|_|_|_|

@@ -1,0 +1,7 @@
+Connect4 File Path:
+gamesmanweb/deploy/ui/game/js/connect4.js
+
+Important Front-End files:
+XML file to add game to page
+see ttt.js for example
+play.js / GCAPI.js

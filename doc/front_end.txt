@@ -1,3 +1,0 @@
-XML file to add game to page
-ttt.js example
-play.js / GCAPI.js
