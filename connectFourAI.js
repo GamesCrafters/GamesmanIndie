@@ -89,27 +89,36 @@ function visitBfs(node, func) {
 
 function chooseMove(Board b) {
 	// AI Function to pick the next move. Expectimax.
-	b.makeMove(call number, player)
 
+    validMoves = []; //List of current valid board moves.
+    bestMove = null; //Best Move to be returned
+    maxVal = -1; //Max value in dict
+    moveDict = {}; // {Move: Value}
+    validMoves = b.validMoves();
+
+    for(var i = 0; i < validMoves.length; i++){
+        //Make move with current valid move
+        //Save It's heuristic return value
+        //Undo the move
+        //Continue appending values and moves for each ValidMove.
+        currentMove = validMoves[i];
+        move = b.makeMove(currentMove);
+        moveDict[currentMove] = b.eval(move);
+        b.undoLastMove();
+    }
+
+    // Dict --> { Move: Value }
+    // Find maximum value, return that key. 
+    for (var values in moveDict) {
+        var localMax = moveDict[values];
+        if (localMax > maxVal) {
+            maxVal = localMax;
+            bestMove = values;
+        }
+    }
+    //Returns Highest Key, aka Best Move.
+    return bestMove;
 }
-
-function eval(Board b) {
-	var heurisitc = 0.0
-
-	if (b.isWin) {} // return really high heustic
-	if (b.isLose) {}// return really low heuristic
-
-	else return 0.0
-
-
-
-}
-
-
-
-
-
-
 
 
 
