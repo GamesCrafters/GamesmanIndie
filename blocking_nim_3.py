@@ -155,6 +155,7 @@ def generateMoves(position): #not sorted, piles distinguishable
     return span
 
 grundycache = {}
+miserecache = {}
 
 def grundy(position): #need tuples for dict keys
     lst = position.toList()
@@ -170,6 +171,27 @@ def grundy(position): #need tuples for dict keys
         values.append(grundy(Position(x[0], x[1], x[2])))
     grundycache[ordered] = mex(values, 2)
     return grundycache[ordered]
+
+def misere_grundy(position): #need tuples for dict keys
+    lst = position.toList()
+    ordered = SortedPosition(lst[0], lst[1], lst[2]).toList()
+    miserecache[SortedPosition(0,0,0)] = float("inf")
+    if ordered in miserecache:
+        return miserecache[ordered] 
+    cache = generateMoves(position)
+    try:
+        while True:
+            cache.remove([0,0,0])
+    except:
+        pass
+    if not cache:
+        miserecache[ordered] = 0
+        return 0
+    values = []
+    for x in cache:
+        values.append(misere_grundy(Position(x[0], x[1], x[2])))
+    miserecache[ordered] = mex(values, 2)
+    return miserecache[ordered]
 
 def mex(vals, count = 1):
     result = 0
